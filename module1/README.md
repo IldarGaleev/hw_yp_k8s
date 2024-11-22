@@ -46,7 +46,7 @@ k expose pod tomcat-pod --name=tomcat-service --port=8080
 <hr class="line" />
 
 
-<html lang="ru"><head><style type="text/css">.line {height:1px;background-color:#525D76;border:none;}</style></head><body><h1>HTTP Status 404 – Не найдено</h1><hr class="line" /><p><b>Type</b> Status Report</p><p><b>Description</b> The origin server did not find a current representation for the target resource or is not willing to disclose that one exists.</p><hr class="line" /><h3>Apache Tomcat/9.0.97</h3></body></html>
+<html lang="ru"><body><h1>HTTP Status 404 – Не найдено</h1><hr class="line" /><p><b>Type</b> Status Report</p><p><b>Description</b> The origin server did not find a current representation for the target resource or is not willing to disclose that one exists.</p><hr class="line" /><h3>Apache Tomcat/9.0.97</h3></body></html>
 
 <hr class="line" />
 
