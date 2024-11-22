@@ -2,7 +2,7 @@
 # FROM maven:3.6.3-jdk-11 AS build 
 
 #jdk-21 по требованию из 2 части задания... в любом случае работают оба))
-FROM maven:3.9.9-ibm-semeru-21-jammy 
+FROM maven:3.9.9-ibm-semeru-21-jammy AS build
 
 WORKDIR /app
 
