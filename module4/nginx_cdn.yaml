@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-cdn
+spec:
+  selector:
+    matchLabels:
+      app: nginx-cdn
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nginx-cdn
+    spec:
+      containers:
+      - name: nginx-cdn
+        image: cr.yandex/crpcqt038mmskd2ime3g/nginx_cdn:latest
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 80
+        command: ["/usr/sbin/nginx"]
+        args: ["-g daemon off;"]
+        
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/usr/sbin/nginx","-s","quit"]
+
+        volumeMounts:
+          - mountPath: /var/www/html/
+            name: shared-data
+        
+        readinessProbe:
+          httpGet:
+            path: /.done
+            port: 80
+          initialDelaySeconds: 0
+          periodSeconds: 60
+          failureThreshold: 5
+        
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+      initContainers:
+      - name: nginx-cdn-init
+        image: cr.yandex/crpcqt038mmskd2ime3g/nginx_cdn:latest
+
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        
+        env:
+        - name: URL
+          valueFrom:
+            configMapKeyRef:
+              name: nginx-cdn-config
+              key: fileUrl
+        
+        volumeMounts:
+        - mountPath: /var/www/html/
+          name: shared-data
+
+        command: [./start.sh]
+      
+      volumes:
+      - name: shared-data
+        emptyDir: {}
+  
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-cdn-service
+spec:
+  selector:
+    app: nginx-cdn
+  ports:
+  - port: 80
+    targetPort: 80
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-cdn-config
+data:
+  fileUrl: https://code.s3.yandex.net/Kubernetes/barsik.jpg
+  # fileUrl: https://mirror.yandex.ru/ubuntu-releases/22.04.5/ubuntu-22.04.5-live-server-amd64.iso
