@@ -1,0 +1,29 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: podinfo-{{ .Release.Name }}-ingress
+  namespace: {{ .Release.Namespace}}
+  {{- if .Values.ingress.tls }}
+  annotations: {{ toYaml .Values.ingress.annotations | nindent 4}}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- if .Values.ingress.tls }}
+  tls:
+  - hosts:
+      - {{ tpl .Values.ingress.host . }}
+    secretName: podinfo-{{ .Release.Name }}-secret
+  {{- end }}
+  rules:
+    - host: {{ tpl .Values.ingress.host .}}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: podinfo-{{ .Release.Name }}-service
+                port:
+                  number: {{ .Values.service.port }}
+{{- end }}
