@@ -1,0 +1,12 @@
+{{- if .Values.container.useConfigFile }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-{{- .Release.Name -}}-config-map
+data:
+  redis.conf: |
+    maxmemory 64mb
+    maxmemory-policy allkeys-lru
+    save ""
+    appendonly no
+{{- end }}

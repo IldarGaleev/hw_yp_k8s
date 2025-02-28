@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: podinfo-{{ .Release.Name }}
+  namespace: {{ .Release.Namespace}}
+spec:
+  replicas: {{.Values.replicas}}
+  selector:
+    matchLabels:
+      app: podinfo-{{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: podinfo-{{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{.Chart.Name}}
+          image: {{ .Values.image.repository }}:{{ tpl .Values.image.tag .}}
+          
+          command:
+            - ./podinfo 
+            {{- if .Values.redis.enabled }}
+            - '--cache-server=tcp://redis-{{- .Release.Name -}}-service:{{- .Values.redis.service.port -}}'
+            {{- end }}
+            {{- range .Values.arguments }}
+            - {{ . | squote }}
+            {{- end }}            
+          
+          ports:
+            - name: http
+              containerPort: {{ .Values.container.port }}
+              protocol: TCP
+          
+          envFrom:
+            - configMapRef:
+                name: podinfo-{{ .Release.Name }}-config-map
+       
+          resources: 
+            {{- toYaml .Values.resources | nindent 12}}

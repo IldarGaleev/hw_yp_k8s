@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-{{- .Release.Name }}
+  labels:
+    app: redis-{{- .Release.Name }}
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: redis-{{- .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: redis-{{- .Release.Name }}
+    spec:
+      containers:
+        - name: {{.Chart.Name}}
+          image: {{ .Values.container.image.repository }}:{{ tpl .Values.container.image.tag .}}
+          
+          imagePullPolicy: IfNotPresent
+          command:
+            - redis-server
+            {{- if .Values.container.useConfigFile }}
+            - "/redis-master/redis.conf"
+            {{- end }}
+          ports:
+            - name: redis
+              containerPort: {{ .Values.container.port }}
+              protocol: TCP
+          livenessProbe:
+            tcpSocket:
+              port: redis            
+            {{- toYaml .Values.probes.liveness | nindent 12}}
+
+          readinessProbe:
+            exec:
+              command:
+                - redis-cli
+                - ping
+            {{- toYaml .Values.probes.readiness | nindent 12}}
+          
+          resources:
+            {{- toYaml .Values.resources | nindent 12}}
+            
+          volumeMounts:
+            - mountPath: /var/lib/redis
+              name: data
+            {{- if .Values.container.useConfigFile }}
+            - mountPath: /redis-master
+              name: config
+            {{- end }}
+      volumes:
+        - name: data
+          emptyDir: {}
+        {{- if .Values.container.useConfigFile }}
+        - name: config
+          configMap:
+            name: redis-{{- .Release.Name -}}-config-map
+            items:
+              - key: redis.conf
+                path: redis.conf
+        {{- end }}

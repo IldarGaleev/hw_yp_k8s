@@ -1,0 +1,41 @@
+replicas: 1
+
+arguments:
+  - --port=9000
+  - --level=debug
+
+image:
+  repository: ghcr.io/stefanprodan/podinfo
+  tag: "{{- $.Chart.AppVersion -}}"
+
+env:
+  PODINFO_UI_MESSAGE: Yandex Praktikum Podinfo
+  PODINFO_UI_LOGO: https://yastatic.net/q/logoaas/v2/Яндекс.svg
+  PODINFO_UI_COLOR: '#ffdb4d'
+
+resources:
+  limits:
+    memory: 256Mi
+    cpu: 100m
+  requests:
+    cpu: 50m
+    memory: 64Mi
+
+container:
+  port: 9000
+
+service:
+  port: 9000
+
+redis:
+  enabled: true
+  service:
+    port: 6379
+
+ingress:
+  enabled: true
+  host: "podinfo-{{- $.Release.Name -}}-{{- $.Release.Namespace -}}.kube.praktikum-services.tech" 
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: "http01-clusterissuer"
+  tls: true

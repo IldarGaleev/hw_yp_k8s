@@ -1,0 +1,29 @@
+
+replicas: 1
+
+container:
+  image:
+    repository: redis
+    tag: "{{- $.Chart.AppVersion -}}"  
+  
+  port: 6379
+  useConfigFile: true
+
+service:
+  port: 6379
+
+probes:
+  liveness:
+    initialDelaySeconds: 5
+    timeoutSeconds: 5
+  readiness:
+    initialDelaySeconds: 5
+    timeoutSeconds: 5
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 32Mi
