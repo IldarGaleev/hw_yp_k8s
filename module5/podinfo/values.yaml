@@ -39,3 +39,9 @@ ingress:
   annotations:
     cert-manager.io/cluster-issuer: "http01-clusterissuer"
   tls: true
+
+hpa:
+  minReplicas: 2
+  maxReplicas: 10
+  httpRequestsRateValue: 200
+  stabilisationWindow: 30
